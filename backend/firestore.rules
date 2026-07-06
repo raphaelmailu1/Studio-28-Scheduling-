@@ -1,0 +1,66 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+
+    /* ---------- HELPER FUNCTIONS ---------- */
+
+    function isAuthenticated() {
+      return request.auth != null;
+    }
+
+    function userDocExists() {
+      return exists(/databases/$(database)/documents/users/$(request.auth.uid));
+    }
+
+    function isAdmin() {
+      return isAuthenticated()
+        && userDocExists()
+        && get(/databases/$(database)/documents/users/$(request.auth.uid)).data.role == "admin";
+    }
+
+    /* ---------- USERS ---------- */
+    match /users/{userId} {
+      // Staff can read user profiles
+      allow read: if isAuthenticated();
+
+      // Only admins can create/update users
+      allow write: if isAdmin();
+    }
+
+    /* ---------- SERVICES ---------- */
+    match /services/{serviceId} {
+      allow read: if isAuthenticated();
+      allow write: if isAdmin();
+    }
+
+    /* ---------- AVAILABILITY ---------- */
+    match /availability/{availabilityId} {
+      allow read: if isAuthenticated();
+      allow write: if isAdmin();
+    }
+
+    /* ---------- APPOINTMENTS ---------- */
+    match /appointments/{appointmentId} {
+
+      // Admin sees all appointments
+      // Stylists see only their own
+      allow read: if isAuthenticated()
+        && (
+          isAdmin()
+          || (
+            resource.data.keys().hasAny(["stylist_uid"])
+            && request.auth.uid == resource.data.stylist_uid
+          )
+        );
+
+      // Only admin can create/update/cancel appointments
+      allow write: if isAdmin();
+    }
+
+    /* ---------- NOTIFICATIONS ---------- */
+    // Backend-controlled only (FastAPI / Cloud Functions)
+    match /notifications/{notificationId} {
+      allow read, write: if false;
+    }
+  }
+}

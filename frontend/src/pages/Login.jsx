@@ -6,6 +6,7 @@ import { signInWithEmailAndPassword } from "firebase/auth";
 import { doc, getDoc } from "firebase/firestore";
 
 import { auth, db } from "../config/firebase";
+import toast from "react-hot-toast";
 
 export default function Login() {
   const navigate = useNavigate();
@@ -28,7 +29,7 @@ export default function Login() {
       const userSnap = await getDoc(userRef);
 
       if (!userSnap.exists()) {
-        alert("User profile not found in Firestore");
+        toast.error("User profile not found in Firestore");
         return;
       }
 
@@ -55,7 +56,7 @@ export default function Login() {
       }
 
     } catch (error) {
-      alert(error.message);
+      toast.error(error.message);
     }
   };
 

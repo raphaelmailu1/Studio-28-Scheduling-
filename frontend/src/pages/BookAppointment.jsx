@@ -1,3 +1,4 @@
+import toast from "react-hot-toast";
 import { useState, useEffect } from "react";
 
 import { getStylists } from "../api/stylists";
@@ -23,6 +24,8 @@ export default function BookAppointment() {
   const [slots, setSlots] = useState([]);
   const [selectedSlot, setSelectedSlot] = useState(null);
   const [stylists, setStylists] = useState([]);
+  const [loadingSlots, setLoadingSlots] = useState(false);
+  const [booking, setBooking] = useState(false);
   
   const duoServices = [
     "Retight 2hr - 3hrs duo",
@@ -61,32 +64,41 @@ export default function BookAppointment() {
   // Fetch available slots
   const fetchSlots = async () => {
     if (!date || !service || !stylist) {
-      alert("Select date, service and stylist first");
+      toast.error("Select date, service and stylist first");
       return;
     }
-
+  
+    setLoadingSlots(true);
+  
     try {
       const data = await getAvailableSlots(date, service, stylist);
-
+  
       if (data.multi_day) {
-        alert(data.message);
+        toast.error(data.message);
         setSlots([]);
         return;
       }
-
+  
       setSlots(data);
+  
+      toast.success("Available slots loaded");
+  
     } catch (err) {
       console.error(err);
-      alert("Failed to fetch slots");
+      toast.error("Failed to fetch available slots");
+    } finally {
+      setLoadingSlots(false);
     }
   };
 
   // Book appointment
   const handleBooking = async () => {
     if (!selectedSlot) {
-      alert("Please select a time slot");
+      toast.error("Please select a time slot");
       return;
     }
+  
+    setBooking(true);
   
     try {
       await createAppointment({
@@ -99,7 +111,7 @@ export default function BookAppointment() {
         start_time: selectedSlot,
       });
   
-      alert("Appointment booked successfully!");
+      toast.success("Appointment booked successfully!");
   
       setClientName("");
       setClientPhone("");
@@ -113,11 +125,13 @@ export default function BookAppointment() {
     } catch (err) {
       console.error(err);
   
-      alert(
+      toast.error(
         err?.response?.data?.detail ||
         err?.message ||
         "Booking failed"
       );
+    } finally {
+      setBooking(false);
     }
   };
 
@@ -232,9 +246,10 @@ return (
 
         <button
           onClick={fetchSlots}
-          className="bg-black text-white px-6 py-3 rounded-xl font-semibold"
+          disabled={loadingSlots}
+          className="bg-black text-white px-6 py-3 rounded-xl font-semibold disabled:opacity-50"
         >
-          Check Available Slots
+          {loadingSlots ? "Loading..." : "Check Available Slots"}
         </button>
       </div>
 
@@ -298,6 +313,7 @@ return (
 
       <button
         onClick={handleBooking}
+        disabled={booking}
         className="
           w-full
           mt-8
@@ -306,11 +322,11 @@ return (
           py-4
           rounded-xl
           font-semibold
+          disabled:opacity-50
         "
       >
-        Confirm Booking
+        {booking ? "Booking Appointment..." : "Confirm Booking"}
       </button>
-
     </div>
   </div>
 );

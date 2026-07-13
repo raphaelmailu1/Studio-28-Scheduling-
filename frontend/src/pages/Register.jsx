@@ -11,6 +11,7 @@ import {
 } from "firebase/firestore";
 
 import { auth, db } from "../config/firebase";
+import toast from "react-hot-toast";
 
 export default function Register() {
   const navigate = useNavigate();
@@ -39,11 +40,11 @@ export default function Register() {
         createdAt: new Date()
       });
 
-      alert("Account created");
+      toast.success("Account created");
 
       navigate("/login");
     } catch (err) {
-      alert(err.message);
+      toast.error(err.message);
     }
   };
 

@@ -9,6 +9,7 @@ import {
 } from "firebase/firestore";
 
 import { db } from "../config/firebase";
+import toast from "react-hot-toast";
 
 export default function ManageStylists() {
   const [stylists, setStylists] = useState([]);
@@ -34,7 +35,7 @@ export default function ManageStylists() {
 
   const addStylist = async () => {
     if (!name || !email) {
-      alert("Enter name and email");
+      toast.error("Enter name and email");
       return;
     }
 

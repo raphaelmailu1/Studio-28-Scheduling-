@@ -1,6 +1,8 @@
 import axios from "axios";
 
-const BASE_URL = "http://127.0.0.1:8000/appointments";
+const API = import.meta.env.VITE_API_URL;
+
+const BASE_URL = `${API}/appointments`;
 
 export const getAppointments = async (date = null) => {
   const url = date ? `${BASE_URL}?date=${date}` : BASE_URL;
@@ -9,23 +11,32 @@ export const getAppointments = async (date = null) => {
 };
 
 export const createAppointment = async (data) => {
-  return await axios.post(BASE_URL, data);
+  return axios.post(BASE_URL, data);
 };
 
 export const cancelAppointment = async (id) => {
-  return await axios.patch(`${BASE_URL}/cancel/${id}`);
+  return axios.patch(`${BASE_URL}/cancel/${id}`);
 };
 
 export const completeAppointment = async (id) => {
-  return await axios.patch(`${BASE_URL}/complete/${id}`);
+  return axios.patch(`${BASE_URL}/complete/${id}`);
 };
 
-export const getAvailableSlots = async (date, service, stylist) => {
+export const getAvailableSlots = async (
+  date,
+  service,
+  stylist
+) => {
   const res = await axios.get(
-    `http://127.0.0.1:8000/appointments/available-slots`,
+    `${BASE_URL}/available-slots`,
     {
-      params: { date, service, stylist },
+      params: {
+        date,
+        service,
+        stylist,
+      },
     }
   );
+
   return res.data;
 };

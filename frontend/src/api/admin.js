@@ -1,12 +1,10 @@
 import axios from "axios";
 
-const API_URL =
-  "http://127.0.0.1:8000/admin";
+const API = import.meta.env.VITE_API_URL;
 
-export const createStylist = async (
-  stylistData
-) => {
+const API_URL = `${API}/admin`;
 
+export const createStylist = async (stylistData) => {
   const response = await axios.post(
     `${API_URL}/create-stylist`,
     stylistData

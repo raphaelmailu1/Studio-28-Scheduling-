@@ -10,7 +10,7 @@ app = FastAPI(title="Studio 28 Scheduler API")
 # Development + Production frontend URLs
 origins = [
     "http://localhost:5173",
-    "https://studio28scheduling.netlify.app/",
+    "https://studio28scheduling.netlify.app",
 ]
 
 app.add_middleware(
